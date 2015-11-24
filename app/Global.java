@@ -45,6 +45,8 @@ public class Global extends GlobalSettings {
 	
 	private void criaDisciplinaTemas(){
 		Disciplina si1 = new Disciplina("Sistemas de Informação 1");
+		Disciplina prob = new Disciplina("Probabilidade e Estatística");
+		Disciplina tc = new Disciplina("Teoria da Computação");
 		si1.addTema(new Tema("Análise x Design"));
 		si1.addTema(new Tema("Orientação a objetos"));
 		si1.addTema(new Tema("GRASP"));
