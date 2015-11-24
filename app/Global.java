@@ -60,6 +60,8 @@ public class Global extends GlobalSettings {
 		si1.addTema(new Tema("Minitestes"));
 		si1.addTema(new Tema("Projeto"));
 		dao.persist(si1);
+		dao.persist(prob);
+		dao.persist(tc);
 		dao.flush();
 	}
 }
