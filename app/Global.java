@@ -87,7 +87,7 @@ public class Global extends GlobalSettings {
 		}
 	}
 	private void geraDicas() {
-		disciplinas = dao.findAllByClassName("Disciplina");
+		disciplinas = dao.findAllByClassName(Disciplina.class.getName());
 		for (int i = 0; i < disciplinas.size(); i++) {
 			String disciplina = disciplinas.get(i).getNome();
 			switch (disciplina){
