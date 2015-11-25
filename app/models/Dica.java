@@ -1,8 +1,6 @@
 package models;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -57,8 +55,13 @@ public abstract class Dica implements Comparable<Dica>{
 	
 	@Transient
 	private DicaDisciplina instanciaDisciplina;
+
+	@Column
+	private Date dataDeCriacao;
 	
-	public Dica(){}
+	public Dica(){
+		dataDeCriacao = Calendar.getInstance().getTime();
+	}
 
 	public Tema getTema() {
 		return tema;
@@ -182,6 +185,10 @@ public abstract class Dica implements Comparable<Dica>{
 	
 	public boolean isUnvotable() {
 		return this.concordancias>=20 || this.discordancias>=20;
+	}
+
+	public Date getDataDeCriacao(){
+		return this.dataDeCriacao;
 	}
 
 	public abstract String getTipo();

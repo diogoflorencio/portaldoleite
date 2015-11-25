@@ -4,16 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import models.Dica;
-import models.DicaAssunto;
-import models.DicaConselho;
-import models.DicaDisciplina;
-import models.DicaMaterial;
-import models.Disciplina;
-import models.MetaDica;
-import models.Tema;
+import models.*;
+import models.Ordenacao.OrdenaDicas;
+import models.Ordenacao.OrdenaPorData;
+import models.Ordenacao.OrdenaPorDiscordancia;
+import models.Ordenacao.OrdenaPorVotosPositivos;
 import models.dao.GenericDAOImpl;
-import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -24,12 +20,20 @@ import play.mvc.Security;
 public class Application extends Controller {
 	private static final int MAX_DENUNCIAS = 3;
 	private static GenericDAOImpl dao = new GenericDAOImpl();
-	
+
+	private static List<Dica> dicas = null;
+
 	@Transactional
 	@Security.Authenticated(Secured.class)
     public static Result index() {
 		List<Disciplina> disciplinas = dao.findAllByClassName(Disciplina.class.getName());
-        return ok(views.html.index.render(disciplinas));
+
+		dicas = dao.findAllByClassName(Dica.class.getName());
+
+		ordenaDicas();
+
+		dicas = dicas.subList(0, 10);
+        return ok(views.html.index.render(disciplinas, dicas));
     }
 	
 	@Transactional
@@ -88,7 +92,8 @@ public class Application extends Controller {
 		
 		Map<String,String> formMap = filledForm.data();
 		
-		//long idTema = Long.parseLong(formMap.get("idTema"));
+		//long idTema = Long.parseLong(form
+		// Map.get("idTema"));
 		
 		Tema tema = dao.findByEntityId(Tema.class, idTema);
 		String userName = session("username");
@@ -392,5 +397,39 @@ public class Application extends Controller {
 		dao.flush();
 		
 		return redirect(routes.Application.disciplina(metaDica.getDisciplina().getId()));
+	}
+
+	public static Result verDica(Long idDica){
+		Dica dica = dao.findByEntityId(Dica.class, idDica);
+		Result result=null;
+		if (dica != null){
+			result = ok(views.html.index.render(null, null));
+		}
+
+		return result;
+	}
+
+	public static void ordenaDicas(){
+
+		OrdenaDicas dicasOrdenadas = null;
+
+		DynamicForm filledForm = Form.form().bindFromRequest();
+
+		Map<String,String> formMap = filledForm.data();
+
+		String tipoKey = formMap.get("tipoDeOrdenacao");
+		switch (tipoKey) {
+			case "Ordena Por Mais Votos Positivos":
+				dicasOrdenadas = new OrdenaPorVotosPositivos();
+				break;
+			case "Ordena Por Mais Discordancias":
+				dicasOrdenadas = new OrdenaPorDiscordancia();
+				break;
+			default:
+				dicasOrdenadas = new OrdenaPorData();
+				break;
+		}
+
+		dicas = dicasOrdenadas.ordenaListaDicas(dicas);
 	}
 }
