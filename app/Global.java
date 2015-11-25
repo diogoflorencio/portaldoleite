@@ -4,6 +4,8 @@ import java.util.List;
 import models.Disciplina;
 import models.Tema;
 import models.dao.GenericDAOImpl;
+import models.User;
+
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
@@ -25,6 +27,7 @@ public class Global extends GlobalSettings {
 				if(dao.findAllByClassName(Disciplina.class.getName()).size() == 0){
 					criaDisciplinaTemas();
 				}
+				if (dao.findAllByClassName(User.class.getName()).size() < 10) criaUsuarios();
 			}
 		});
 	}
@@ -71,5 +74,13 @@ public class Global extends GlobalSettings {
 		dao.persist(prob);
 		dao.persist(tc);
 		dao.flush();
+	}
+	private void criaUsuarios() {
+		for (int i = 0; i < 10; i++) {
+			User user = new User("User" + i + "@ccc.ufcg.edu.br", "123", "user" + i);
+			user.setNome("User" + i);
+			dao.persist(user);
+			dao.flush();
+		}
 	}
 }
