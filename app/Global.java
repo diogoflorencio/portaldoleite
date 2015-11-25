@@ -5,6 +5,9 @@ import models.Disciplina;
 import models.Tema;
 import models.dao.GenericDAOImpl;
 import models.User;
+import models.Dica;
+import models.DicaDisciplina;
+import models.DicaMaterial;
 
 import play.Application;
 import play.GlobalSettings;
@@ -83,4 +86,46 @@ public class Global extends GlobalSettings {
 			dao.flush();
 		}
 	}
+	private void geraDicas() {
+		disciplinas = dao.findAllByClassName("Disciplina");
+		for (int i = 0; i < disciplinas.size(); i++) {
+			String disciplina = disciplinas.get(i).getNome();
+			switch (disciplina){
+				case "Sistemas de Informação 1":
+					Tema tema = disciplinas.get(i).getTemaByNome("GRASP");
+					DicaDisciplina dicaDisc = new DicaDisciplina("SI","Os padrões GRASP trazem qualidade");
+					DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
+					setDicaDisciplinas(tema,dicaDisc,dicaM);
+        	        break;
+			}
+
+		}
+	}
+	private void setDicaDisciplinas(Tema tema, DicaDisciplina dicaDisciplina, DicaMaterial dicaMaterial){
+		tema.addDica(dicaDisciplina);
+		dicaDisciplina.setTema(tema);
+		dicaDisciplina.setUser("User3");
+		tema.addDica(dicaMaterial);
+		dicaMaterial.setTema(tema);
+		dicaMaterial.setUser("User1");
+
+		dao.persist(dicaMaterial);
+		dao.persist(dicaDisciplina);
+		dao.flush();
+
+		dicaDisciplina.addUsuarioQueVotou("user3");
+		dicaDisciplina.incrementaConcordancias();
+		dicaDisciplina.addUsuarioQueVotou("user1");
+		dicaDisciplina.incrementaConcordancias();
+
+		dicaMaterial.addUsuarioQueVotou("user3");
+		dicaMaterial.incrementaConcordancias();
+		dicaMaterial.addUsuarioQueVotou("user1");
+		dicaMaterial.incrementaConcordancias();
+
+		dao.merge(dicaDisciplina);
+		dao.merge(dicaMaterial);
+		dao.flush();
+	}
+
 }

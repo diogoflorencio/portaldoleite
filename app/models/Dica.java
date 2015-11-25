@@ -90,7 +90,7 @@ public abstract class Dica implements Comparable<Dica>{
 	public void setConcordancias(int concordancias) {
 		this.concordancias = concordancias;
 	}
-	
+
 	public void incrementaConcordancias(){
 		this.concordancias = concordancias + 1;
 	}
