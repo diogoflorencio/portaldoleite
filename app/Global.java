@@ -3,6 +3,7 @@ import java.util.List;
 
 import models.Disciplina;
 import models.Tema;
+import models.User;
 import models.dao.GenericDAOImpl;
 import models.User;
 import models.Dica;
