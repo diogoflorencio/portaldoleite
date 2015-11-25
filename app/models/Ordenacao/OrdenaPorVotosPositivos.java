@@ -12,6 +12,6 @@ public class OrdenaPorVotosPositivos implements OrdenaDicas {
     @Override
     public List<Dica> ordenaListaDicas(List<Dica> dicaList) {
         Collections.sort(dicaList);
-        return null;
+        return dicaList;
     }
 }

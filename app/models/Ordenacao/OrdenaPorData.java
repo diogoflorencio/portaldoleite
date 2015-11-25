@@ -24,6 +24,6 @@ public class OrdenaPorData implements OrdenaDicas {
                 }
             }
         });
-        return null;
+        return dicaList;
     }
 }
