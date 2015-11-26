@@ -66,7 +66,7 @@ public class Global extends GlobalSettings {
 		si1.addTema(new Tema("Labs"));
 		si1.addTema(new Tema("Minitestes"));
 		si1.addTema(new Tema("Projeto"));
-		prob.addTema(new Tema("Variancia e Propriedades"));
+		prob.addTema(new Tema("Variancia e desvio padrão"));
 		prob.addTema(new Tema("Esperança"));
 		prob.addTema(new Tema("Distribuição de Poisson"));
 		prob.addTema(new Tema("Modelo Normal"));
@@ -91,17 +91,20 @@ public class Global extends GlobalSettings {
 	}
 	private void geraDicas() {
 		disciplinas = dao.findAllByClassName(Disciplina.class.getName());
-		for (int i = 0; i < disciplinas.size(); i++) {
-			String disciplina = disciplinas.get(i).getNome();
-			switch (disciplina){
-				case "Sistemas de Informação 1":
-					Tema tema = disciplinas.get(i).getTemaByNome("Orientação a objetos");
-					DicaDisciplina dicaDisc = new DicaDisciplina("P2","Programa O.O");
-					DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
-					setDicaDisciplinas(tema,dicaDisc,dicaM);
-        	        break;
-			}
-		}
+        for (Disciplina disciplina1 : disciplinas) {
+            String disciplina = disciplina1.getNome();
+            if (disciplina.equals("Sistemas de Informação 1")) {
+                Tema tema = disciplina1.getTemaByNome("Orientação a objetos");
+                DicaDisciplina dicaDisc = new DicaDisciplina("Sistemas de Informação 1", "Programa O.O");
+                DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
+                setDicaDisciplinas(tema, dicaDisc, dicaM);
+            } else if (disciplina.equals("Probabilidade e Estatística")){
+                Tema tema = disciplina1.getTemaByNome("Variancia e desvio padrão");
+                DicaDisciplina dicaDisc = new DicaDisciplina("Probabilidade e Estatística", "Melhorar a nota");
+                DicaMaterial dicaM = new DicaMaterial("http://http://mundoeducacao.bol.uol.com.br/matematica/variancia-desvio-padrao.htm");
+                setDicaDisciplinas(tema, dicaDisc, dicaM);
+            }
+        }
 	}
 	private void setDicaDisciplinas(Tema tema, DicaDisciplina dicaDisciplina, DicaMaterial dicaMaterial){
 		tema.addDica(dicaDisciplina);
@@ -113,21 +116,25 @@ public class Global extends GlobalSettings {
 
 		dao.persist(dicaMaterial);
 		dao.persist(dicaDisciplina);
-		dao.flush();
+        dao.flush();
 
-		dicaDisciplina.addUsuarioQueVotou("user3");
-		dicaDisciplina.incrementaConcordancias();
-		dicaDisciplina.addUsuarioQueVotou("user1");
-		dicaDisciplina.incrementaConcordancias();
-
-		dicaMaterial.addUsuarioQueVotou("user3");
-		dicaMaterial.incrementaConcordancias();
-		dicaMaterial.addUsuarioQueVotou("user1");
-		dicaMaterial.incrementaConcordancias();
-
-		dao.merge(dicaDisciplina);
-		dao.merge(dicaMaterial);
-		dao.flush();
+        setVoto(dicaDisciplina, dicaMaterial);
 	}
+
+    private void setVoto(DicaDisciplina dicaDisciplina, DicaMaterial dicaMaterial) {
+        dicaDisciplina.addUsuarioQueVotou("user3");
+        dicaDisciplina.incrementaConcordancias();
+        dicaDisciplina.addUsuarioQueVotou("user1");
+        dicaDisciplina.incrementaConcordancias();
+
+        dicaMaterial.addUsuarioQueVotou("user3");
+        dicaMaterial.incrementaConcordancias();
+        dicaMaterial.addUsuarioQueVotou("user1");
+        dicaMaterial.incrementaConcordancias();
+
+        dao.merge(dicaDisciplina);
+        dao.merge(dicaMaterial);
+        dao.flush();
+    }
 
 }
