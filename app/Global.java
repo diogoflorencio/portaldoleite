@@ -74,11 +74,11 @@ public class Global extends GlobalSettings {
 		tc.addTema(new Tema("Maquina de Turing"));
 		tc.addTema(new Tema("Automato Finito Deterministico"));
 		tc.addTema(new Tema("Automato Finito Não Deterministico"));
+		geraDicas();
 		dao.persist(si1);
 		dao.persist(prob);
 		dao.persist(tc);
 		dao.flush();
-		geraDicas();
 	}
 	private void criaUsuarios() {
 		for (int i = 0; i < 10; i++) {
@@ -94,13 +94,12 @@ public class Global extends GlobalSettings {
 			String disciplina = disciplinas.get(i).getNome();
 			switch (disciplina){
 				case "Sistemas de Informação 1":
-					Tema tema = disciplinas.get(i).getTemaByNome("GRASP");
+					Tema tema = disciplinas.get(i).getTemaByNome("Orientação a objetos");
 					DicaDisciplina dicaDisc = new DicaDisciplina("P2","Programa O.O");
 					DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
 					setDicaDisciplinas(tema,dicaDisc,dicaM);
         	        break;
 			}
-
 		}
 	}
 	private void setDicaDisciplinas(Tema tema, DicaDisciplina dicaDisciplina, DicaMaterial dicaMaterial){
