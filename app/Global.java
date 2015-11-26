@@ -66,7 +66,8 @@ public class Global extends GlobalSettings {
 		si1.addTema(new Tema("Labs"));
 		si1.addTema(new Tema("Minitestes"));
 		si1.addTema(new Tema("Projeto"));
-		prob.addTema(new Tema("Esperança X Variancia"));
+		prob.addTema(new Tema("Variancia e Propriedades"));
+		prob.addTema(new Tema("Esperança"));
 		prob.addTema(new Tema("Distribuição de Poisson"));
 		prob.addTema(new Tema("Modelo Normal"));
 		prob.addTema(new Tema("Teorema Central do Limite"));
