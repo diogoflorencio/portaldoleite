@@ -78,6 +78,7 @@ public class Global extends GlobalSettings {
 		dao.persist(prob);
 		dao.persist(tc);
 		dao.flush();
+		geraDicas();
 	}
 	private void criaUsuarios() {
 		for (int i = 0; i < 10; i++) {
@@ -94,7 +95,7 @@ public class Global extends GlobalSettings {
 			switch (disciplina){
 				case "Sistemas de Informação 1":
 					Tema tema = disciplinas.get(i).getTemaByNome("GRASP");
-					DicaDisciplina dicaDisc = new DicaDisciplina("SI","Os padrões GRASP trazem qualidade");
+					DicaDisciplina dicaDisc = new DicaDisciplina("P2","Programa O.O");
 					DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
 					setDicaDisciplinas(tema,dicaDisc,dicaM);
         	        break;
