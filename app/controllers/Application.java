@@ -28,8 +28,9 @@ public class Application extends Controller {
 		if (dicas == null){
 			dicas = dao.findAllByClassName(Dica.class.getName());
 		}
-
-		dicas = dicas.subList(0, 10);
+		if(dicas.size()>1) {
+			dicas = dicas.subList(0, dicas.size());
+		}
 		return ok(views.html.index.render(disciplinas, dicas));
 	}
 
