@@ -28,6 +28,13 @@ public class User {
 	
 	public User() {
 	}
+
+	public User(String email, String pass, String login, String nome) {
+		this.email = email;
+		this.pass = BCrypt.hashpw(pass, BCrypt.gensalt());
+		this.login = login;
+		this.nome = nome;	
+	}
 	
 	public User(String email, String pass, String login) {
 		this.email = email;		
