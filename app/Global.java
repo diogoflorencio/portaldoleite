@@ -117,4 +117,29 @@ public class Global extends GlobalSettings {
 		}
 	}
 
+	private void setDicas(Tema tema, DicaDisciplina dicaD, DicaMaterial dicaM){
+		tema.addDica(dicaD);
+		dicaD.setTema(tema);
+		dicaD.setUser("User0");
+		tema.addDica(dicaM);
+		dicaM.setTema(tema);
+		dicaM.setUser("User1");
+
+		dao.persist(dicaM);
+		dao.persist(dicaD);
+		dao.flush();
+
+		setVotos("user2",dicaD);
+		setVotos("user2",dicaD);
+		setVotos("user2",dicaM);
+		setVotos("user2",dicaM);
+	}
+
+	private void setVotos(String user, Dica dica){
+		dica.addUsuarioQueVotou(user);
+		dica.incrementaConcordancias();
+		dao.merge(dica);
+		dao.flush();
+	}
+
 }
