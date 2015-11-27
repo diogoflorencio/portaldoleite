@@ -43,33 +43,38 @@ public class Global extends GlobalSettings {
 			}});
 	}
 
-	private void criaDisciplinaTemas(){
+	private void criaDisciplinaTemas() {
+		Disciplina tc = new Disciplina("Teoria da Computação");
 		Disciplina si1 = new Disciplina("Sistemas de Informação 1");
 		Disciplina prob = new Disciplina("Probabilidade e Estatística");
-		Disciplina tc = new Disciplina("Teoria da Computação");
-		si1.addTema(new Tema("Análise x Design"));
-		si1.addTema(new Tema("Orientação a objetos"));
-		si1.addTema(new Tema("GRASP"));
-		si1.addTema(new Tema("GoF"));
-		si1.addTema(new Tema("Arquitetura"));
-		si1.addTema(new Tema("Play"));
-		si1.addTema(new Tema("JavaScript"));
-		si1.addTema(new Tema("HTML / CSS / Bootstrap"));
-		si1.addTema(new Tema("Heroku"));
-		si1.addTema(new Tema("Labs"));
-		si1.addTema(new Tema("Minitestes"));
-		si1.addTema(new Tema("Projeto"));
-		prob.addTema(new Tema("Esperança X Variancia"));
-		prob.addTema(new Tema("Distribuição de Poisson"));
+
+		si1.addTema(new Tema("Análise x Design", si1));
+		si1.addTema(new Tema("Orientação a objetos", si1));
+		si1.addTema(new Tema("GRASP", si1));
+		si1.addTema(new Tema("GoF", si1));
+		si1.addTema(new Tema("Arquitetura", si1));
+		si1.addTema(new Tema("Play", si1));
+		si1.addTema(new Tema("JavaScript", si1));
+		si1.addTema(new Tema("HTML / CSS / Bootstrap", si1));
+		si1.addTema(new Tema("Heroku", si1));
+		si1.addTema(new Tema("Labs", si1));
+		si1.addTema(new Tema("Minitestes", si1));
+		si1.addTema(new Tema("Projeto", si1));
+		prob.addTema(new Tema("Variancia e desvio padrão",prob));
+		prob.addTema(new Tema("Esperança e propriedades",prob));
+		prob.addTema(new Tema("Distribuição de Poisson",prob));
 		prob.addTema(new Tema("Modelo Normal"));
-		prob.addTema(new Tema("Teorema Central do Limite"));
-		tc.addTema(new Tema("Lema do Bombeamento"));
-		tc.addTema(new Tema("Maquina de Turing"));
-		tc.addTema(new Tema("Automato Finito Deterministico"));
-		tc.addTema(new Tema("Automato Finito Não Deterministico"));
+		prob.addTema(new Tema("Teorema Central do Limite",prob));
+		tc.addTema(new Tema("Lema do Bombeamento",tc));
+		tc.addTema(new Tema("Maquina de Turing",tc));
+		tc.addTema(new Tema("Automato Finito Deterministico",tc));
+		tc.addTema(new Tema("Automato Finito Não Deterministico",tc));
+
 		dao.persist(si1);
 		dao.persist(prob);
 		dao.persist(tc);
+		dao.flush();
+	}
 
 		for (int i = 0; i < 10; i++) {
 			User user = new User("User" + i + "@ccc.ufcg.edu.br", "123", "user" + i);
