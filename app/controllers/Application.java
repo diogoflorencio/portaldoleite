@@ -1,12 +1,24 @@
 package controllers;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import models.*;
-import models.Ordenacao.*;
+import models.Dica;
+import models.DicaAssunto;
+import models.DicaConselho;
+import models.DicaDisciplina;
+import models.DicaMaterial;
+import models.Disciplina;
+import models.MetaDica;
+import models.Ordenacao.OrdenaDicas;
+import models.Ordenacao.OrdenaPorData;
+import models.Ordenacao.OrdenaPorDiscordancia;
+import models.Ordenacao.OrdenaPorVotosPositivos;
+import models.Tema;
 import models.dao.GenericDAOImpl;
+import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -17,8 +29,8 @@ import play.mvc.Security;
 public class Application extends Controller {
 	private static final int MAX_DENUNCIAS = 3;
 	private static GenericDAOImpl dao = new GenericDAOImpl();
-
 	private static List<Dica> dicas = null;
+	private static OrdenaDicas dicasOrdenadas = null;
 
 	@Transactional
 	@Security.Authenticated(Secured.class)
@@ -26,11 +38,36 @@ public class Application extends Controller {
 		List<Disciplina> disciplinas = dao.findAllByClassName(Disciplina.class.getName());
 
 		if (dicas == null){
+			dicasOrdenadas = new OrdenaPorData();
 			dicas = dao.findAllByClassName(Dica.class.getName());
+			Collections.sort(dicas);
 		}
 
-		dicas = dicas.subList(0, 10);
+		if (dicas.size() > 10) {
+			dicas.subList(0, 10);
+		}
 		return ok(views.html.index.render(disciplinas, dicas));
+	}
+
+	@Transactional
+	@Security.Authenticated(Secured.class)
+	public static Result ordenaDicas(Integer tipo){
+		switch (tipo) {
+			case 1:
+				dicasOrdenadas = new OrdenaPorVotosPositivos();
+				break;
+			case 2:
+				dicasOrdenadas = new OrdenaPorDiscordancia();
+				break;
+			default:
+				dicasOrdenadas = new OrdenaPorData();
+				break;
+		}
+
+		Dica.setTipoDeOrdenação(dicasOrdenadas);
+		Collections.sort(dicas);
+
+		return redirect(routes.Application.index());
 	}
 
 	@Transactional
@@ -89,8 +126,7 @@ public class Application extends Controller {
 
 		Map<String,String> formMap = filledForm.data();
 
-		//long idTema = Long.parseLong(form
-		// Map.get("idTema"));
+		//long idTema = Long.parseLong(formMap.get("idTema"));
 
 		Tema tema = dao.findByEntityId(Tema.class, idTema);
 		String userName = session("username");
@@ -399,35 +435,10 @@ public class Application extends Controller {
 	public static Result verDica(Long idDica){
 		Dica dica = dao.findByEntityId(Dica.class, idDica);
 		Result result=null;
-		if (dica != null){
-			result = ok(views.html.index.render(null, null));
-		}
+
+		//NO LUGAR DO RESULT, VOCE COLOCA A URL PARA ACESSAR A DICA --> ok(views.html.verdica.render(dica));
 
 		return result;
 	}
 
-	public static Result ordenaDicas(){
-
-		OrdenaDicas dicasOrdenadas = null;
-
-		DynamicForm filledForm = Form.form().bindFromRequest();
-
-		Map<String,String> formMap = filledForm.data();
-
-		String tipoKey = formMap.get("tipoDeOrdenacao");
-		switch (tipoKey) {
-			case "concordacias":
-				dicasOrdenadas = new OrdenaPorVotosPositivos();
-				break;
-			case "discordancias":
-				dicasOrdenadas = new OrdenaPorDiscordancia();
-				break;
-			default:
-				dicasOrdenadas = new OrdenaPorData();
-				break;
-		}
-
-		dicas = dicasOrdenadas.ordenaListaDicas(dicas);
-		return redirect(routes.Application.index());
-	}
 }

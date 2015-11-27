@@ -10,8 +10,12 @@ import java.util.List;
  */
 public class OrdenaPorVotosPositivos implements OrdenaDicas {
     @Override
-    public List<Dica> ordenaListaDicas(List<Dica> dicaList) {
-        Collections.sort(dicaList);
-        return dicaList;
+    public int ordenaListaDicas(Dica o1, Dica o2) {
+        if (o1.getConcordancias() > o2.getConcordancias()){
+            return -1;
+        }else if (o1.getConcordancias() < o2.getConcordancias()){
+            return 1;
+        }
+        return 0;
     }
 }

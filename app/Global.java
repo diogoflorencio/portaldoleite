@@ -1,14 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import models.Disciplina;
-import models.Tema;
-import models.User;
+import models.*;
 import models.dao.GenericDAOImpl;
-import models.User;
-import models.Dica;
-import models.DicaDisciplina;
-import models.DicaMaterial;
 
 import play.Application;
 import play.GlobalSettings;
@@ -31,7 +25,6 @@ public class Global extends GlobalSettings {
 				if(dao.findAllByClassName(Disciplina.class.getName()).size() == 0){
 					criaDisciplinaTemas();
 				}
-				if (dao.findAllByClassName(User.class.getName()).size() < 10) criaUsuarios();
 			}
 		});
 	}
@@ -66,8 +59,7 @@ public class Global extends GlobalSettings {
 		si1.addTema(new Tema("Labs"));
 		si1.addTema(new Tema("Minitestes"));
 		si1.addTema(new Tema("Projeto"));
-		prob.addTema(new Tema("Variancia e Propriedades"));
-		prob.addTema(new Tema("Esperança"));
+		prob.addTema(new Tema("Esperança X Variancia"));
 		prob.addTema(new Tema("Distribuição de Poisson"));
 		prob.addTema(new Tema("Modelo Normal"));
 		prob.addTema(new Tema("Teorema Central do Limite"));
@@ -75,58 +67,58 @@ public class Global extends GlobalSettings {
 		tc.addTema(new Tema("Maquina de Turing"));
 		tc.addTema(new Tema("Automato Finito Deterministico"));
 		tc.addTema(new Tema("Automato Finito Não Deterministico"));
-		geraDicas();
 		dao.persist(si1);
 		dao.persist(prob);
 		dao.persist(tc);
-		dao.flush();
-	}
-	private void criaUsuarios() {
+
 		for (int i = 0; i < 10; i++) {
 			User user = new User("User" + i + "@ccc.ufcg.edu.br", "123", "user" + i);
 			user.setNome("User" + i);
 			dao.persist(user);
-			dao.flush();
 		}
-	}
-	private void geraDicas() {
-		disciplinas = dao.findAllByClassName(Disciplina.class.getName());
-		for (int i = 0; i < disciplinas.size(); i++) {
-			String disciplina = disciplinas.get(i).getNome();
-			switch (disciplina){
-				case "Sistemas de Informação 1":
-					Tema tema = disciplinas.get(i).getTemaByNome("Orientação a objetos");
-					DicaDisciplina dicaDisc = new DicaDisciplina("P2","Programa O.O");
-					DicaMaterial dicaM = new DicaMaterial("http://www.devmedia.com.br/desenvolvimento-com-qualidade-com-grasp/28704");
-					setDicaDisciplinas(tema,dicaDisc,dicaM);
-        	        break;
-			}
-		}
-	}
-	private void setDicaDisciplinas(Tema tema, DicaDisciplina dicaDisciplina, DicaMaterial dicaMaterial){
-		tema.addDica(dicaDisciplina);
-		dicaDisciplina.setTema(tema);
-		dicaDisciplina.setUser("User3");
-		tema.addDica(dicaMaterial);
-		dicaMaterial.setTema(tema);
-		dicaMaterial.setUser("User1");
 
-		dao.persist(dicaMaterial);
-		dao.persist(dicaDisciplina);
-		dao.flush();
+		DicaMaterial dica1 = new DicaMaterial("https://sites.google.com/site/prog2ufcg/p2/programa");
+		si1.getTemaByNome("Orientação a objetos").addDica(dica1);
+		dica1.setTema(si1.getTemaByNome("Orientação a objetos"));
+		dica1.setUser("user2");
 
-		dicaDisciplina.addUsuarioQueVotou("user3");
-		dicaDisciplina.incrementaConcordancias();
-		dicaDisciplina.addUsuarioQueVotou("user1");
-		dicaDisciplina.incrementaConcordancias();
+		DicaConselho dica2 = new DicaConselho("Java, play, html, css, javascript");
+		si1.getTemaByNome("Projeto").addDica(dica2);
+		dica2.setTema(si1.getTemaByNome("Projeto"));
+		dica2.setUser("user5");
 
-		dicaMaterial.addUsuarioQueVotou("user3");
-		dicaMaterial.incrementaConcordancias();
-		dicaMaterial.addUsuarioQueVotou("user1");
-		dicaMaterial.incrementaConcordancias();
+		DicaAssunto dica3 = new DicaAssunto("Maquina de Turing");
+		tc.getTemaByNome("Maquina de Turing").addDica(dica3);
+		dica3.setTema(tc.getTemaByNome("Maquina de Turing"));
+		dica3.setUser("user7");
 
-		dao.merge(dicaDisciplina);
-		dao.merge(dicaMaterial);
+		DicaDisciplina dica4 = new DicaDisciplina("Probabilidade e Estatística", "Conhecimentos em estatística necessários");
+		prob.getTemaByNome("Distribuição de Poisson").addDica(dica4);
+		dica4.setTema(prob.getTemaByNome("Distribuição de Poisson"));
+		dica4.setUser("user5");
+
+		DicaMaterial dica5 = new DicaMaterial("http://leg.ufpr.br/~silvia/CE001/node38.html");
+		prob.getTemaByNome("Teorema Central do Limite").addDica(dica5);
+		dica5.setTema(prob.getTemaByNome("Teorema Central do Limite"));
+		dica5.setUser("user4");
+
+		//insere os votos nas dicas
+		dica1.incrementaConcordancias();
+		dica1.incrementaConcordancias();
+		dica2.incrementaConcordancias();
+		dica2.incrementaConcordancias();
+		dica3.incrementaConcordancias();
+		dica3.incrementaConcordancias();
+		dica4.incrementaConcordancias();
+		dica4.incrementaConcordancias();
+		dica5.incrementaConcordancias();
+		dica5.incrementaConcordancias();
+
+		dao.persist(dica1);
+		dao.persist(dica2);
+		dao.persist(dica3);
+		dao.persist(dica4);
+		dao.persist(dica5);
 		dao.flush();
 	}
 

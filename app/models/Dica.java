@@ -1,5 +1,8 @@
 package models;
 
+import models.Ordenacao.OrdenaDicas;
+import models.Ordenacao.OrdenaPorData;
+
 import java.util.*;
 
 import javax.persistence.CollectionTable;
@@ -57,10 +60,11 @@ public abstract class Dica implements Comparable<Dica>{
 	private DicaDisciplina instanciaDisciplina;
 
 	@Column
-	private Date dataDeCriacao;
-	
+	private Date dataDeCriacao = new Date();
+
+	private static OrdenaDicas tipoDeOrdenacao = new OrdenaPorData();
+
 	public Dica(){
-		dataDeCriacao = Calendar.getInstance().getTime();
 	}
 
 	public Tema getTema() {
@@ -93,7 +97,7 @@ public abstract class Dica implements Comparable<Dica>{
 	public void setConcordancias(int concordancias) {
 		this.concordancias = concordancias;
 	}
-
+	
 	public void incrementaConcordancias(){
 		this.concordancias = concordancias + 1;
 	}
@@ -148,13 +152,11 @@ public abstract class Dica implements Comparable<Dica>{
 	 */
 	@Override
 	public int compareTo(Dica otherDica) {
-		if (this.getConcordancias()>otherDica.getConcordancias()) {
-			return -1;
-		} else if (this.getConcordancias()<otherDica.getConcordancias()) {
-			return 1;
-		} else {
-			return 0;
-		}
+		return this.tipoDeOrdenacao.ordenaListaDicas(this, otherDica);
+	}
+
+	public static void setTipoDeOrdenação(OrdenaDicas ordenaDicas){
+		tipoDeOrdenacao = ordenaDicas;
 	}
 	
 	public void checaTipoDica() {
@@ -187,9 +189,13 @@ public abstract class Dica implements Comparable<Dica>{
 		return this.concordancias>=20 || this.discordancias>=20;
 	}
 
-	public Date getDataDeCriacao(){
-		return this.dataDeCriacao;
+	public abstract String getTipo();
+
+	public Date getDataDeCriacao() {
+		return dataDeCriacao;
 	}
 
-	public abstract String getTipo();
+	public void setDataDeCriacao(Date dataDeCriacao) {
+		this.dataDeCriacao = dataDeCriacao;
+	}
 }
