@@ -27,6 +27,7 @@ public class Global extends GlobalSettings {
 				}
 				if(dao.findAllByClassName(Disciplina.class.getName()).size() == 0){
 					criaDisciplinaTemas();
+					geraDicas();
 				}
 			}
 		});
