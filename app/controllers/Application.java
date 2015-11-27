@@ -37,14 +37,14 @@ public class Application extends Controller {
 	public static Result index() {
 		List<Disciplina> disciplinas = dao.findAllByClassName(Disciplina.class.getName());
 
-		if (dicas == null){
+		if (dicas == null) {
 			dicasOrdenadas = new OrdenaPorData();
 			dicas = dao.findAllByClassName(Dica.class.getName());
 			Collections.sort(dicas);
 		}
 		if (dicas.size() > 10) {
 			dicas.subList(0, 10);
-
+		}
 		return ok(views.html.index.render(disciplinas, dicas));
 	}
 
