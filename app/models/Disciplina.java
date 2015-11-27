@@ -64,6 +64,7 @@ public class Disciplina {
 	
 	public void addTema(Tema tema){
 		this.temas.add(tema);
+		
 	}
 	
 	public Tema getTemaByNome(String nome){
@@ -74,7 +75,7 @@ public class Disciplina {
 		}
 		return null;
 	}
-
+	
 	public List<MetaDica> getMetaDicas() {
 		Collections.sort(metaDicas);
 		return this.metaDicas;

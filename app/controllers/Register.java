@@ -12,8 +12,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.login;
 
-import play.mvc.*;
-
 public class Register extends Controller {
 	
 	private static GenericDAO dao = new GenericDAOImpl();
@@ -35,16 +33,19 @@ public class Register extends Controller {
 		if(checkDBForUser(email)) {
         	flash("fail", "E-mail em uso");
         	return badRequest(login.render());
-        } else if (checkDBForName(nick)) {
-			flash("fail", "Login em uso");
-			return badRequest(login.render());
-		} else {
+        } else if(checkDBForName(nick)) {
+        	flash("fail", "Login em uso");
+        	return badRequest(login.render());
+        }
+		else {
 			User usuario = new User(email, pass, nick);
 			usuario.setNome(nome);
-
-			dao.persist(usuario);
-			return redirect(routes.Login.show());
-		}
+			
+        	dao.persist(usuario);
+            return redirect(
+                routes.Login.show()
+            );
+        }
     }
 
 	private static boolean checkDBForName(String login) {

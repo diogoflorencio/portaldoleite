@@ -1,9 +1,10 @@
 package controllers;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.Query;
 
 import models.Dica;
 import models.DicaAssunto;
@@ -12,13 +13,8 @@ import models.DicaDisciplina;
 import models.DicaMaterial;
 import models.Disciplina;
 import models.MetaDica;
-import models.Ordenacao.OrdenaDicas;
-import models.Ordenacao.OrdenaPorData;
-import models.Ordenacao.OrdenaPorDiscordancia;
-import models.Ordenacao.OrdenaPorVotosPositivos;
 import models.Tema;
 import models.dao.GenericDAOImpl;
-import play.Logger;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.jpa.Transactional;
@@ -29,46 +25,31 @@ import play.mvc.Security;
 public class Application extends Controller {
 	private static final int MAX_DENUNCIAS = 3;
 	private static GenericDAOImpl dao = new GenericDAOImpl();
-	private static List<Dica> dicas = null;
-	private static OrdenaDicas dicasOrdenadas = null;
-
+	
+	@SuppressWarnings("unchecked")
 	@Transactional
 	@Security.Authenticated(Secured.class)
-	public static Result index() {
+    public static Result index() {
+		DynamicForm requestFiltro = Form.form().bindFromRequest();
+		
 		List<Disciplina> disciplinas = dao.findAllByClassName(Disciplina.class.getName());
-
-		if (dicas == null) {
-			dicasOrdenadas = new OrdenaPorData();
-			dicas = dao.findAllByClassName(Dica.class.getName());
-			Collections.sort(dicas);
+		
+		Query consultaUltimasDezDicas = null;
+		
+		if (requestFiltro.get("filtro") == null || requestFiltro.get("filtro").equals("maisRecentes")) {
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.id DESC"); // Query para as últimas dicas
+		}else if (requestFiltro.get("filtro").equals("maisDiscordancias")) {
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.discordancias DESC"); // Query para as com mais votos negativos
+		}else{
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.concordancias DESC"); // Query para as com mais votos positivos
 		}
-		if (dicas.size() > 10) {
-			dicas.subList(0, 10);
-		}
-		return ok(views.html.index.render(disciplinas, dicas));
-	}
+		
+		consultaUltimasDezDicas.setMaxResults(10);
+		
+        return ok(views.html.index.render(disciplinas, consultaUltimasDezDicas.getResultList()));
+    }
 
-	@Transactional
-	@Security.Authenticated(Secured.class)
-	public static Result ordenaDicas(Integer tipo){
-		switch (tipo) {
-			case 1:
-				dicasOrdenadas = new OrdenaPorVotosPositivos();
-				break;
-			case 2:
-				dicasOrdenadas = new OrdenaPorDiscordancia();
-				break;
-			default:
-				dicasOrdenadas = new OrdenaPorData();
-				break;
-		}
-
-		Dica.setTipoDeOrdenação(dicasOrdenadas);
-		Collections.sort(dicas);
-
-		return redirect(routes.Application.index());
-	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result tema(long id) {
@@ -79,7 +60,7 @@ public class Application extends Controller {
 		}
 		return ok(views.html.tema.render(listaDisciplina, tema));
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result disciplina(long id) {
@@ -90,14 +71,14 @@ public class Application extends Controller {
 		}
 		return ok(views.html.disciplina.render(listaDisciplina, disciplina, false));
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result disciplinaErro(Disciplina disciplina) {
 		List<Disciplina> listaDisciplina = dao.findAllByClassName(Disciplina.class.getName());
 		return ok(views.html.disciplina.render(listaDisciplina, disciplina, true));
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result metadica(long id) {
@@ -107,29 +88,38 @@ public class Application extends Controller {
 		if(disciplina == null || metadica == null){
 			return erro();
 		}
-
+		
 		return ok(views.html.metadica.render(listaDisciplina, disciplina, metadica));
 	}
-
+	
 	@Transactional
 	public static Result erro(){
 		List<Disciplina> disciplinas = dao.findAllByClassName(Disciplina.class.getName());
 		return ok(views.html.erro.render(disciplinas));
 	}
 
+	private static void carregaInformacoesDicas(Tema tema,Dica dica){
+		String userName = session("username");
+		tema.addDica(dica);
+		dica.setTema(tema);
+		dica.setUser(userName);
+		dao.persist(dica);
+	}
+
+
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result cadastrarDica(long idTema) {
-
+		
 		DynamicForm filledForm = Form.form().bindFromRequest();
-
+		
 		Map<String,String> formMap = filledForm.data();
-
+		
 		//long idTema = Long.parseLong(formMap.get("idTema"));
-
+		
 		Tema tema = dao.findByEntityId(Tema.class, idTema);
 		String userName = session("username");
-
+		
 		if (filledForm.hasErrors()) {
 			return tema(idTema);
 		} else {
@@ -139,52 +129,41 @@ public class Application extends Controller {
 					String assunto = formMap.get("assunto");
 					DicaAssunto dicaAssunto = new DicaAssunto(assunto);
 
-					tema.addDica(dicaAssunto);
-					dicaAssunto.setTema(tema);
-					dicaAssunto.setUser(userName);
-					dao.persist(dicaAssunto);
+					carregaInformacoesDicas(tema,dicaAssunto);
+
 					break;
 				case "conselho":
 					String conselho = formMap.get("conselho");
 					DicaConselho dicaConselho = new DicaConselho(conselho);
+					carregaInformacoesDicas(tema,dicaConselho);
 
-					tema.addDica(dicaConselho);
-					dicaConselho.setTema(tema);
-					dicaConselho.setUser(userName);
-					dao.persist(dicaConselho);
 					break;
 				case "disciplina":
 					String disciplinas = formMap.get("disciplinas");
 					String razao = formMap.get("razao");
-
 					DicaDisciplina dicaDisciplina = new DicaDisciplina(disciplinas, razao);
 
-					tema.addDica(dicaDisciplina);
-					dicaDisciplina.setTema(tema);
-					dicaDisciplina.setUser(userName);
-					dao.persist(dicaDisciplina);
+					carregaInformacoesDicas(tema,dicaDisciplina);
+
 					break;
 				case "material":
+
 					String url = formMap.get("url");
 					DicaMaterial dicaMaterial = new DicaMaterial(url);
-
-					tema.addDica(dicaMaterial);
-					dicaMaterial.setTema(tema);
-					dicaMaterial.setUser(userName);
-					dao.persist(dicaMaterial);
+					carregaInformacoesDicas(tema,dicaMaterial);
 					break;
 				default:
 					break;
 			}
-
+			
 			dao.merge(tema);
-
-			dao.flush();
-
+			
+			dao.flush();			
+			
 			return redirect(routes.Application.tema(idTema));
 		}
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result avaliarDificuldadeTema(long idTema) {
@@ -193,10 +172,10 @@ public class Application extends Controller {
 			return tema(idTema);
 		} else {
 			Map<String, String> formMap = filledForm.data();
-			int dificuldade = Integer.parseInt(formMap.get("dificuldade"));
+			int dificuldade = Integer.parseInt(formMap.get("dificuldade"));	
 			String userLogin = session("login");
 			Tema tema = dao.findByEntityId(Tema.class, idTema);
-
+			
 			//Tema tema = dao.findByEntityId(Tema.class, id)(Tema) dao.findByAttributeName("Tema", "name", nomeTema).get(0);
 			tema.incrementarDificuldade(userLogin, dificuldade);
 			dao.merge(tema);
@@ -204,14 +183,14 @@ public class Application extends Controller {
 			return redirect(routes.Application.tema(idTema));
 		}
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result addDiscordanciaEmDica(long idDica) {
 		DynamicForm filledForm = Form.form().bindFromRequest();
-
+		
 		Dica dica = dao.findByEntityId(Dica.class, idDica);
-
+		
 		if (filledForm.hasErrors()) {
 			return tema(dica.getTema().getId());
 		} else {
@@ -219,17 +198,17 @@ public class Application extends Controller {
 			String username = session("username");
 			String login = session("login");
 			String discordancia = formMap.get("discordancia");
-
+			
 			dica.addUsuarioQueVotou(login);
 			dica.addUserCommentary(username, discordancia);
 			dica.incrementaDiscordancias();
 			dao.merge(dica);
 			dao.flush();
-
+			
 			return redirect(routes.Application.tema(dica.getTema().getId()));
 		}
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result upVoteDica(long idDica) {
@@ -241,7 +220,7 @@ public class Application extends Controller {
 			dao.merge(dica);
 			dao.flush();
 		}
-
+		
 		return redirect(routes.Application.tema(dica.getTema().getId()));
 	}
 
@@ -249,9 +228,9 @@ public class Application extends Controller {
 	@Security.Authenticated(Secured.class)
 	public static Result addDiscordanciaEmMetaDica(long idMetaDica) {
 		DynamicForm filledForm = Form.form().bindFromRequest();
-
+		
 		MetaDica metaDica = dao.findByEntityId(MetaDica.class, idMetaDica);
-
+		
 		if (filledForm.hasErrors()) {
 			return disciplina(metaDica.getDisciplina().getId());
 		} else {
@@ -259,17 +238,17 @@ public class Application extends Controller {
 			String username = session("username");
 			String login = session("login");
 			String discordancia = formMap.get("discordancia");
-
+			
 			metaDica.addUsuarioQueVotou(login);
 			metaDica.addUserCommentary(username, discordancia);
 			metaDica.incrementaDiscordancias();
 			dao.merge(metaDica);
 			dao.flush();
-
+			
 			return redirect(routes.Application.disciplina(metaDica.getDisciplina().getId()));
 		}
 	}
-
+	
 	@Transactional
 	@Security.Authenticated(Secured.class)
 	public static Result upVoteMetaDica(long idMetaDica) {
@@ -283,10 +262,10 @@ public class Application extends Controller {
 		}
 		return redirect(routes.Application.disciplina(metaDica.getDisciplina().getId()));
 	}
-
+	
 	/**
 	 * Action para o cadastro de uma metadica em uma disciplina.
-	 *
+	 * 
 	 * @param idDisciplina
 	 *           O id da {@code Disciplina}.
 	 * @return
@@ -297,35 +276,35 @@ public class Application extends Controller {
 	@Security.Authenticated(Secured.class)
 	public static Result cadastrarMetaDica(long idDisciplina) {
 		DynamicForm filledForm = Form.form().bindFromRequest();
-
+		
 		Map<String,String> formMap = filledForm.data();
-
+		
 		String comment = formMap.get("comentario");
-
+		
 		Disciplina disciplina = dao.findByEntityId(Disciplina.class, idDisciplina);
 		String userName = session("username");
-
+		
 		if (filledForm.hasErrors()) {
 			return disciplinaErro(disciplina);
 		} else {
-			MetaDica metaDica = new MetaDica(disciplina, userName, comment);
-
+			MetaDica metaDica = new MetaDica(disciplina, userName, comment);			
+			
 			Map<String,String[]> map = request().body().asFormUrlEncoded();
-
+			
 			String[] checkedDicas = map.get("dica");
 			String[] checkedMetaDicas = map.get("metadica");
-
-
+			
+			
 			if(checkedDicas == null && checkedMetaDicas == null){
 				return disciplinaErro(disciplina);
 			}
-
+			
 			if(checkedDicas != null){
 				List<String> listaIdDicas = Arrays.asList(checkedDicas);
 
 				for (String id : listaIdDicas) {
 					Long idDica = Long.parseLong(id);
-
+					
 					Dica checkedDica = dao.findByEntityId(Dica.class, idDica);
 
 					if(checkedDica != null){
@@ -340,7 +319,7 @@ public class Application extends Controller {
 
 				for (String id : listaIdMetaDicas) {
 					Long idMetaDica = Long.parseLong(id);
-
+					
 					MetaDica checkedMetaDica = dao.findByEntityId(MetaDica.class, idMetaDica);
 
 					if(checkedMetaDica != null){
@@ -349,20 +328,20 @@ public class Application extends Controller {
 					}
 				}
 			}
-
+			
 			disciplina.addMetaDica(metaDica);
-
+			
 			dao.persist(metaDica);
 			dao.merge(disciplina);
 			dao.flush();
-
+			
 			return redirect(routes.Application.disciplina(metaDica.getDisciplina().getId()));
 		}
 	}
-
+	
 	/**
 	 * Action usada para a denúncia de uma Dica considerada como imprópria pelo usuário.
-	 *
+	 * 
 	 * @param idDica
 	 *           O id da {@code Dica} denunciada.
 	 * @return
@@ -373,15 +352,15 @@ public class Application extends Controller {
 	@Security.Authenticated(Secured.class)
 	public static Result denunciarDica(Long idDica) {
 		Dica dica = dao.findByEntityId(Dica.class, idDica);
-
+		
 		String login = session("login");
 		if (!dica.wasFlaggedByUser(login)) {
 			dica.addUsuarioFlag(login);
 			dica.incrementaFlag();
-
+			
 			if (dica.getFlag() == MAX_DENUNCIAS) {
 				dao.removeById(Dica.class, idDica);
-
+				
 				for (MetaDica metadica : dica.getMetaDicas()) {
 					metadica.getDicasAdicionadas().remove(dica);
 					dao.merge(metadica);
@@ -392,15 +371,15 @@ public class Application extends Controller {
 		} else {
 			flash("fail", "Usuário já denunciou a dica.");
 		}
-
+		
 		dao.flush();
-
+		
 		return redirect(routes.Application.tema(dica.getTema().getId()));
 	}
-
+	
 	/**
 	 * Action usada para a denúncia de uma MetaDica considerada como imprópria pelo usuário.
-	 *
+	 * 
 	 * @param idDica
 	 *           O id da {@code MetaDica} denunciada.
 	 * @return
@@ -411,12 +390,12 @@ public class Application extends Controller {
 	@Security.Authenticated(Secured.class)
 	public static Result denunciarMetaDica(Long idMetaDica) {
 		MetaDica metaDica = dao.findByEntityId(MetaDica.class, idMetaDica);
-
+		
 		String login = session("login");
 		if (!metaDica.wasFlaggedByUser(login)) {
 			metaDica.addUsuarioFlag(login);
 			metaDica.incrementaFlag();
-
+			
 			if (metaDica.getFlag() == MAX_DENUNCIAS) {
 				dao.removeById(MetaDica.class, idMetaDica);
 			} else {
@@ -425,19 +404,18 @@ public class Application extends Controller {
 		} else {
 			flash("fail", "Usuário já denunciou a dica.");
 		}
-
+		
 		dao.flush();
-
+		
 		return redirect(routes.Application.disciplina(metaDica.getDisciplina().getId()));
 	}
-
-	public static Result verDica(Long idDica){
+	
+	@Transactional
+	@Security.Authenticated(Secured.class)
+	public static Result detalhesDica(Long idDica){
+		List<Disciplina> listaDisciplina = dao.findAllByClassName(Disciplina.class.getName());
 		Dica dica = dao.findByEntityId(Dica.class, idDica);
-		Result result=null;
-
-		//NO LUGAR DO RESULT, VOCE COLOCA A URL PARA ACESSAR A DICA --> ok(views.html.verdica.render(dica));
-
-		return result;
+		
+		return ok(views.html.detalhes.render(listaDisciplina, dica, dica.getTema()));
 	}
-
 }

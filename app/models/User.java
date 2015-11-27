@@ -25,7 +25,7 @@ public class User {
 	private String nome;
 	@Column
 	private String login;
-	
+
 	public User() {
 	}
 
@@ -35,9 +35,9 @@ public class User {
 		this.login = login;
 		this.nome = nome;
 	}
-	
+
 	public User(String email, String pass, String login) {
-		this.email = email;		
+		this.email = email;
 		this.pass = BCrypt.hashpw(pass, BCrypt.gensalt());
 		this.login = login;
 	}
@@ -65,15 +65,15 @@ public class User {
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	
+
 	public String getLogin() {
 		return login;
 	}
-	
+
 	public void setLogin(String login) {
 		this.login = login;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -90,7 +90,7 @@ public class User {
 		}
 		User other = (User) obj;
 		return other.hashCode()==this.hashCode();
-	}	
+	}
 
 	public Long getId() {
 		return id;
