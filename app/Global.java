@@ -22,6 +22,9 @@ public class Global extends GlobalSettings {
 		JPA.withTransaction(new play.libs.F.Callback0() {
 			@Override
 			public void invoke() throws Throwable {
+				if (dao.findAllByClassName(User.class.getName()).size() < 10) {
+					criaUser();
+				}
 				if(dao.findAllByClassName(Disciplina.class.getName()).size() == 0){
 					criaDisciplinaTemas();
 				}
@@ -41,6 +44,13 @@ public class Global extends GlobalSettings {
 					dao.removeById(Disciplina.class, disciplina.getId());
 				}
 			}});
+	}
+
+	private void criaUser() {
+		for (int i = 0; i < 10; i++) {
+			User user = new User("User" + i + "@ccc.ufcg.edu.br", "123", "user" + i, "User" + i);
+			dao.persist(user);
+		}
 	}
 
 	private void criaDisciplinaTemas() {
@@ -76,55 +86,4 @@ public class Global extends GlobalSettings {
 		dao.flush();
 	}
 
-		for (int i = 0; i < 10; i++) {
-			User user = new User("User" + i + "@ccc.ufcg.edu.br", "123", "user" + i);
-			user.setNome("User" + i);
-			dao.persist(user);
-		}
-
-		DicaMaterial dica1 = new DicaMaterial("https://sites.google.com/site/prog2ufcg/p2/programa");
-		si1.getTemaByNome("Orientação a objetos").addDica(dica1);
-		dica1.setTema(si1.getTemaByNome("Orientação a objetos"));
-		dica1.setUser("user2");
-
-		DicaConselho dica2 = new DicaConselho("Java, play, html, css, javascript");
-		si1.getTemaByNome("Projeto").addDica(dica2);
-		dica2.setTema(si1.getTemaByNome("Projeto"));
-		dica2.setUser("user5");
-
-		DicaAssunto dica3 = new DicaAssunto("Maquina de Turing");
-		tc.getTemaByNome("Maquina de Turing").addDica(dica3);
-		dica3.setTema(tc.getTemaByNome("Maquina de Turing"));
-		dica3.setUser("user7");
-
-		DicaDisciplina dica4 = new DicaDisciplina("Probabilidade e Estatística", "Conhecimentos em estatística necessários");
-		prob.getTemaByNome("Distribuição de Poisson").addDica(dica4);
-		dica4.setTema(prob.getTemaByNome("Distribuição de Poisson"));
-		dica4.setUser("user5");
-
-		DicaMaterial dica5 = new DicaMaterial("http://leg.ufpr.br/~silvia/CE001/node38.html");
-		prob.getTemaByNome("Teorema Central do Limite").addDica(dica5);
-		dica5.setTema(prob.getTemaByNome("Teorema Central do Limite"));
-		dica5.setUser("user4");
-
-		//insere os votos nas dicas
-		dica1.incrementaConcordancias();
-		dica1.incrementaConcordancias();
-		dica2.incrementaConcordancias();
-		dica2.incrementaConcordancias();
-		dica3.incrementaConcordancias();
-		dica3.incrementaConcordancias();
-		dica4.incrementaConcordancias();
-		dica4.incrementaConcordancias();
-		dica5.incrementaConcordancias();
-		dica5.incrementaConcordancias();
-
-		dao.persist(dica1);
-		dao.persist(dica2);
-		dao.persist(dica3);
-		dao.persist(dica4);
-		dao.persist(dica5);
-		dao.flush();
-		dao.flush();
-	}
 }

@@ -33,7 +33,7 @@ public class User {
 		this.email = email;
 		this.pass = BCrypt.hashpw(pass, BCrypt.gensalt());
 		this.login = login;
-		this.nome = nome;	
+		this.nome = nome;
 	}
 	
 	public User(String email, String pass, String login) {
