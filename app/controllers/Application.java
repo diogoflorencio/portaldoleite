@@ -42,10 +42,9 @@ public class Application extends Controller {
 			dicas = dao.findAllByClassName(Dica.class.getName());
 			Collections.sort(dicas);
 		}
-
 		if (dicas.size() > 10) {
 			dicas.subList(0, 10);
-		}
+
 		return ok(views.html.index.render(disciplinas, dicas));
 	}
 

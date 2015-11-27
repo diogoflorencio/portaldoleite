@@ -14,7 +14,7 @@ public class Global extends GlobalSettings {
 
 	private static GenericDAOImpl dao = new GenericDAOImpl();
 	private List<Disciplina> disciplinas = new ArrayList<>();
-	
+
 	@Override
 	public void onStart(Application app) {
 		Logger.info("Aplicação inicializada...");
@@ -28,21 +28,21 @@ public class Global extends GlobalSettings {
 			}
 		});
 	}
-	
+
 	@Override
 	public void onStop(Application app){
-	    JPA.withTransaction(new play.libs.F.Callback0() {
-	    @Override
-	    public void invoke() throws Throwable {
-	        Logger.info("Aplicação finalizando...");
-	        disciplinas = dao.findAllByClassName("Disciplina");
+		JPA.withTransaction(new play.libs.F.Callback0() {
+			@Override
+			public void invoke() throws Throwable {
+				Logger.info("Aplicação finalizando...");
+				disciplinas = dao.findAllByClassName("Disciplina");
 
-	        for (Disciplina disciplina: disciplinas) {
-	        dao.removeById(Disciplina.class, disciplina.getId());
-	       } 
-	    }}); 
+				for (Disciplina disciplina: disciplinas) {
+					dao.removeById(Disciplina.class, disciplina.getId());
+				}
+			}});
 	}
-	
+
 	private void criaDisciplinaTemas(){
 		Disciplina si1 = new Disciplina("Sistemas de Informação 1");
 		Disciplina prob = new Disciplina("Probabilidade e Estatística");
@@ -120,6 +120,6 @@ public class Global extends GlobalSettings {
 		dao.persist(dica4);
 		dao.persist(dica5);
 		dao.flush();
+		dao.flush();
 	}
-
 }

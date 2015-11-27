@@ -5,6 +5,7 @@
 # Home page
 GET         /                               controllers.Application.index()
 GET         /logout                         controllers.Login.logout()
+GET         /ordena/:tipodeordenacao        controllers.Application.ordenaDicas(tipodeordenacao : Integer)
 
 # Login
 GET         /login                          controllers.Login.show()
@@ -30,8 +31,6 @@ POST        /cadastrarMetaDica/:id          controllers.Application.cadastrarMet
 
 POST        /denunciarDica/:id              controllers.Application.denunciarDica(id: Long)
 POST        /denunciarMetaDica/:id          controllers.Application.denunciarMetaDica(id: Long)
-
-GET         /verDica/:id                    controllers.Application.verDica(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                   controllers.Assets.at(path="/public", file)
