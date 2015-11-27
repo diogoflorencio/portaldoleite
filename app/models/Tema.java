@@ -45,7 +45,14 @@ public class Tema {
 	private int dificuldade;
 	
 	public Tema(){}
-	
+
+	public Tema(String name) {
+		this.name = name;
+		this.dicas = new ArrayList<Dica>();
+		this.usersDifficulty = new HashMap<String, String>();
+		this.disciplina = disciplina;
+	}
+
 	public Tema(String name) {
 		this.name = name;
 		this.dicas = new ArrayList<Dica>();
