@@ -86,4 +86,35 @@ public class Global extends GlobalSettings {
 		dao.flush();
 	}
 
+	private void geraDicas() {
+		Tema tema;
+		DicaMaterial dicaM;
+		DicaDisciplina dicaD;
+		disciplinas = dao.findAllByClassName("Disciplina");
+
+		for (int i = 0; i < disciplinas.size(); i++) {
+			String disciplina = disciplinas.get(i).getNome();
+			switch (disciplina){
+				case "Sistemas de Informação 1":
+					tema = disciplinas.get(i).getTemaByNome("Orientação a objetos");
+					dicaM = new DicaMaterial("http://www.devmedia.com.br/os-4-pilares-da-programacao-orientada-a-objetos/9264");
+					dicaD = new DicaDisciplina("Programação 2", "para aprender tecnicas voltadas a OO");
+					setDicas(tema,dicaD,dicaM);
+					break;
+				case "Probabilidade e Estatística":
+					tema = disciplinas.get(i).getTemaByNome("Esperança e propriedades");
+					dicaD = new DicaDisciplina("Cálculo 2", "para dominar series e integrais");
+					dicaM = new DicaMaterial("https://pt.wikipedia.org/wiki/Valor_esperado");
+					setDicas(tema,dicaD,dicaM);
+					break;
+				case "Teoria da Computação":
+					tema = disciplinas.get(i).getTemaByNome("Automato Finito Deterministico");
+					dicaM = new DicaMaterial("http://www.decom.ufop.br/anderson/BCC242/AFD.pdf");
+					dicaD = new DicaDisciplina("Grafos", "pq tem q saber msm");
+					setDicas(tema,dicaD,dicaM);
+					break;
+			}
+		}
+	}
+
 }
