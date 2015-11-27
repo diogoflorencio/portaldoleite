@@ -1,4 +1,4 @@
-package controllers;
+﻿package controllers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,11 +37,11 @@ public class Application extends Controller {
 		Query consultaUltimasDezDicas = null;
 		
 		if (requestFiltro.get("filtro") == null || requestFiltro.get("filtro").equals("maisRecentes")) {
-			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.id DESC"); // Query para as últimas dicas
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.id DESC");
 		}else if (requestFiltro.get("filtro").equals("maisDiscordancias")) {
-			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.discordancias DESC"); // Query para as com mais votos negativos
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.discordancias DESC");
 		}else{
-			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.concordancias DESC"); // Query para as com mais votos positivos
+			consultaUltimasDezDicas = dao.createQuery("FROM Dica dica ORDER BY dica.concordancias DESC");
 		}
 		
 		consultaUltimasDezDicas.setMaxResults(10);
